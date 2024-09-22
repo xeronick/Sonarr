@@ -1,17 +1,18 @@
-FROM linuxserver/sonarr
+FROM ghcr.io/linuxserver/sonarr
 
 ENV MMT_UPDATE false
 ENV MMT_FFMPEG_URL https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
 ENV MMT_OPENSSL_VERSION 1.1.1k
 
 RUN \
-  apt-get update && \
-  apt-get install -y \
+  apk update && \
+  apk add --no-cache \
   ffmpeg \
   git \
   python3 \
-  python3-pip \
-  php7.2-cli \
+  py3-pip \
+  py3-virtualenv \
+  php-cli \
   nano \
   wget
 
@@ -19,8 +20,6 @@ RUN \
 RUN mkdir /transcoder
 COPY root/ /
 RUN \
-  python3 -m pip install --user --upgrade pip && \
-  python3 -m pip install --user virtualenv && \
   python3 -m virtualenv /transcoder/venv && \
   /transcoder/venv/bin/pip install -r /transcoder/setup/requirements.txt
 
@@ -49,7 +48,8 @@ RUN \
 RUN \
   ln -s /downloads /data && \
   ln -s /config/transcoder/autoProcess.ini /transcoder/config/autoProcess.ini && \
+  apk del --purge && \
   rm -rf \
-	/tmp/* \
-	/var/lib/apt/lists/* \
-	/var/tmp/*
+    /root/.cache \
+    /tmp/* \
+    /var/tmp/*
